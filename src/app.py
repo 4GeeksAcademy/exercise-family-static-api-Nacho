@@ -38,7 +38,37 @@ def handle_hello():
     return jsonify(response_body), 200
 
 
+@app.route("/add", methods=['POST'])
+def add_member():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid data"}), 400
+    if "first_name" not in data or "age" not in data or "lucky_numbers" not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+    member = {
+        "id": jackson_family._generate_id(),
+        "first_name": data["first_name"],
+        "last_name": jackson_family.last_name,
+        "age": data["age"],
+        "lucky_numbers": data["lucky_numbers"]
+    }
+    jackson_family.add_member(member)
+    return jsonify({"message": "Member added successfully"}), 201
 
+@app.route("/delete/<int:member_id>", methods=['DELETE'])
+def delete_member(member_id):
+    member = jackson_family.get_member(member_id )
+    if not member:
+        return jsonify({"error": "Member not found"}), 404
+    jackson_family.delete_member(member_id)
+    return jsonify({"message": "Member deleted successfully"}), 200
+
+@app.route("/member/<int:member_id>", methods=['GET'])
+def get_member(member_id):
+    member = jackson_family.get_member(member_id)
+    if not member:
+        return jsonify({"error": "Member not found"}), 404
+    return jsonify(member), 200
 # This only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
